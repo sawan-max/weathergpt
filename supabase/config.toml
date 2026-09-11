@@ -1,0 +1,5 @@
+[functions.weather-chat]
+verify_jwt = true
+
+[functions.weather-proxy]
+verify_jwt = true
