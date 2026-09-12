@@ -96,16 +96,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         setDetecting(false);
       },
-      () => {
-        setDetecting(false);
-      },
+      () => { setDetecting(false); },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
     );
   }, []);
 
-  const selectLocation = useCallback((loc: SelectedLocation) => {
-    setSelectedLocation(loc);
-  }, []);
+  const selectLocation = useCallback((loc: SelectedLocation) => { setSelectedLocation(loc); }, []);
 
   const addLocation = useCallback(async (name: string, lat: number, lon: number, country?: string) => {
     await saveLocation(name, lat, lon, country, savedLocations.length === 0);
