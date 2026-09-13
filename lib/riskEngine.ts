@@ -2,12 +2,7 @@ import { RiskAssessment, RiskContributor, SelectedLocation } from './types';
 import { getWeather } from './weather';
 import { generateAlerts } from './weather';
 
-interface TerrainInfo {
-  elevation: number;
-  slope: number;
-  terrainType: 'plains' | 'hills' | 'mountains' | 'coastal' | 'plateau';
-  historicalHazard: number;
-}
+interface TerrainInfo { elevation: number; slope: number; terrainType: 'plains' | 'hills' | 'mountains' | 'coastal' | 'plateau'; historicalHazard: number; }
 
 const TERRAIN_DB: Record<string, TerrainInfo> = {
   gangtok: { elevation: 1650, slope: 35, terrainType: 'mountains', historicalHazard: 75 },
@@ -37,16 +32,8 @@ const TERRAIN_DB: Record<string, TerrainInfo> = {
   delhi: { elevation: 216, slope: 3, terrainType: 'plains', historicalHazard: 30 },
 };
 
-function getTerrainInfo(cityName: string): TerrainInfo | null {
-  const key = cityName.toLowerCase().replace(/\s+/g, '');
-  if (TERRAIN_DB[key]) return TERRAIN_DB[key];
-  if (TERRAIN_DB[key.replace('new', '')]) return TERRAIN_DB[key.replace('new', '')];
-  return null;
-}
-
-function clamp01(v: number): number {
-  return Math.max(0, Math.min(100, v));
-}
+function getTerrainInfo(cityName: string): TerrainInfo | null { const key = cityName.toLowerCase().replace(/\s+/g, ''); if (TERRAIN_DB[key]) return TERRAIN_DB[key]; if (TERRAIN_DB[key.replace('new', '')]) return TERRAIN_DB[key.replace('new', '')]; return null; }
+function clamp01(v: number): number { return Math.max(0, Math.min(100, v)); }
 
 export async function assessRisk(location: SelectedLocation): Promise<RiskAssessment> {
   const locationName = `${location.city}, ${location.state}, ${location.country}`;
@@ -74,9 +61,8 @@ export async function assessRisk(location: SelectedLocation): Promise<RiskAssess
   const weights = [0.3, 0.2, 0.2, 0.15, 0.15];
   const riskScore = Math.round(contributors.reduce((sum, c, i) => sum + c.level * (weights[i] || 0.1), 0));
   let overallRisk: RiskAssessment['overallRisk'] = 'low';
-  if (riskScore >= 70) overallRisk = 'very_high';
-  else if (riskScore >= 50) overallRisk = 'high';
-  else if (riskScore >= 30) overallRisk = 'moderate';
+  if (riskScore >= 70) overallRisk = 'very_high'; else if (riskScore >= 50) overallRisk = 'high'; else if (riskScore >= 30) overallRisk = 'moderate';
+  const riskLabel = overallRisk === 'very_high' ? 'VERY HIGH ATTENTION' : overallRisk === 'high' ? 'HIGH ATTENTION' : overallRisk === 'moderate' ? 'MODERATE ATTENTION' : 'LOW RISK';
   let explanation = '';
   if (overallRisk === 'very_high' || overallRisk === 'high') {
     explanation = `Current conditions indicate elevated hazard concern for ${location.city}. `;
@@ -93,13 +79,8 @@ export async function assessRisk(location: SelectedLocation): Promise<RiskAssess
 }
 
 export function formatRiskAssessment(risk: RiskAssessment): string {
-  let text = `${risk.locationName}\n\nCurrent Risk: ${risk.overallRisk === 'very_high' ? 'VERY HIGH ATTENTION' : risk.overallRisk === 'high' ? 'HIGH ATTENTION' : risk.overallRisk === 'moderate' ? 'MODERATE ATTENTION' : 'LOW RISK'}\n\n`;
-  text += `Risk Score: ${risk.riskScore}/100\n\n`;
-  text += `Risk contributors:\n`;
-  for (const c of risk.contributors) {
-    const bars = '█'.repeat(Math.round(c.level / 10)) + '░'.repeat(10 - Math.round(c.level / 10));
-    text += `${c.label}: ${bars} ${c.level}/100\n  ${c.description}\n`;
-  }
+  let text = `${risk.locationName}\n\nCurrent Risk: ${risk.overallRisk === 'very_high' ? 'VERY HIGH ATTENTION' : risk.overallRisk === 'high' ? 'HIGH ATTENTION' : risk.overallRisk === 'moderate' ? 'MODERATE ATTENTION' : 'LOW RISK'}\n\nRisk Score: ${risk.riskScore}/100\n\nRisk contributors:\n`;
+  for (const c of risk.contributors) { const bars = '█'.repeat(Math.round(c.level / 10)) + '░'.repeat(10 - Math.round(c.level / 10)); text += `${c.label}: ${bars} ${c.level}/100\n  ${c.description}\n`; }
   text += `\nWhat does this mean?\n${risk.explanation}\n\n${risk.disclaimer}`;
   return text;
 }
